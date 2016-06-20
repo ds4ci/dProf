@@ -6,7 +6,7 @@ Author: Jim Porzak
 Maintainer: Jim Porzak <Jim@DS4CI.org>
 Description: Apply data quality profiling methods based on
     Jack Olson's Data Quality: The Accuracy Dimension.
-License: GPL
+License: GPL-3
 LazyData: TRUE
 Imports:
     ggplot2,
@@ -18,3 +18,8 @@ Imports:
     stringr,
     uuid,
     readr
+RoxygenNote: 5.0.1
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
