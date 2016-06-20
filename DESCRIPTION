@@ -1,0 +1,20 @@
+Package: dProf
+Type: Package
+Title: Data Profiler
+Version: 0.1.0
+Author: Jim Porzak
+Maintainer: Jim Porzak <Jim@DS4CI.org>
+Description: Apply data quality profiling methods based on
+    Jack Olson's Data Quality: The Accuracy Dimension.
+License: GPL
+LazyData: TRUE
+Imports:
+    ggplot2,
+    grid,
+    gridExtra,
+    tidyr,
+    dplyr,
+    knitr,
+    stringr,
+    uuid,
+    readr
