@@ -1,0 +1,112 @@
+---
+title: "Simple dProf Report via RMarkdown"
+author: "Jim Porzak"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simple dProf Report via RMarkdown}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+params:
+  dProfProjectID: "use 1st row"
+  dProfRunPath: !r as.character("C:/proj/dProf/dpRun.RData")
+---
+
+```{r rmd_setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+```{r report_setup, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(stringr)
+
+line_length <- 100    ## set length of Head, Tail, Top, & Bottom strings
+
+load(params$dProfRunPath)
+# str(dpProj)
+ProjRow <- ifelse(params$dProfProjectID == "use 1st row", 1,
+                  which(dpProj$project_id == params$dProfProjectID))
+ProjID <- dpProj$project_id[ProjRow]
+# ProjRow
+# str(dpTables)
+
+```
+
+## Data Profile of Project: `r dpProj$project_name[ProjRow]`
+
+* Description: `r dpProj$project_description`
+* Notes: `r dpProj$project_notes`
+* Created by: `r dpProj$created_by` at `r dpProj$created_at`
+* dpRun Metadata: `r dpMeta`
+
+### Tables in Project
+```{r tbl_summary, echo=FALSE}
+tbl_sum <- dpTables[ProjRow, ] %>%
+  select(table_id, table_name, table_description, table_rows, table_columns) %>%
+  arrange(table_id)
+kable(tbl_sum,
+      col.names = c("ID", "Name", "Description", "# Rows", "# Cols"))
+```
+
+
+```{r col_summary, echo=FALSE, results="asis", fig.height= 2}
+for(ith_tbl in tbl_sum$table_id) {
+  col_sum <- dpColProp %>%
+    filter(project_id == dpProj$project_id[ProjRow],
+           table_id == ith_tbl) %>%
+    arrange(column_id)
+  cat("## Column Level Profile for Table:", tbl_sum$table_name[ith_tbl], "\n")
+  cat(max(col_sum$num_rows), "rows. ", nrow(col_sum), "columns.\n")
+  for(ith_col in col_sum$column_id) {
+    col_sum_i <- col_sum %>%
+      filter(column_id == ith_col)
+    with(col_sum_i,
+      cat("\n### Column ", column_id, ": ", column_name, " (", column_type,
+          ": from ", min_length, " to ", max_length,
+          ifelse(column_type %in% c("integer", "numeric"), " digits", " characters"),
+          ".)", "\n", sep = ""))
+    kt1 <- col_sum_i %>%
+      select(num_rows, num_nulls, num_distinct, num_empty,
+             num_numeric, num_date)
+    print(kable(kt1,
+                col.names = c("# Rows", "# NULLs", "# Distinct",
+                             "# Empty", "# Numeric", "# Date")))
+    kt2 <- col_sum_i %>%
+      select(minimum, first_quartile, second_quartile, mean, third_quartile,
+             maximum)
+    print(kable(kt2, align = 'r',
+                col.names = c("Min", "1st Qtl", "2nd Qtl", "Mean", "3rd Qtl",
+                              "Max")))
+    cat("\n")
+    bars <- dpColPlts %>%
+      filter(project_id == ProjID, table_id == ith_tbl, column_id == ith_col,
+             plot_id == 1) %>%
+      select(plot_type, x_var, count)
+
+    if (bars$plot_type[1] == "histogram") {
+      bars$x_var <- as.numeric(bars$x_var)
+      p <- ggplot(bars, aes(x_var, count)) + geom_bar(stat = "identity") +
+             xlab("Value") + ylab("# Rows")
+    } else {
+      XLab <- ifelse(bars$plot_type[1] == "first character", "1st Character of String",
+                     ifelse(bars$plot_type[1] == "catigorical", "Category",
+                            ""))
+      p <- ggplot(bars, aes(x_var, count)) + geom_bar(stat = "identity") +
+             xlab(XLab) + ylab("# Rows")
+    }
+
+    print(p)
+
+    cat("\n")
+    cat("\n* __Head:__", str_sub(col_sum$head[ith_col], end = line_length),
+        "\n* __Tail:__", str_sub(col_sum$tail[ith_col], end = line_length),
+        "\n* __Bottom:__", str_sub(col_sum$bottom[ith_col], end = line_length),
+        "\n* __Top:__", str_sub(col_sum$top[ith_col], end = line_length), "\n")
+
+    # if (ith_col >= 10) break
+  }
+}
+
+```
