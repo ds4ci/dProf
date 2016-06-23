@@ -9,14 +9,44 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This is a simple example of a data profiling run
+This is a simple example of a data profiling run. 
 
+### Make the "project" data frame.
+
+Which may have more than one row, but typically does not.
 ```{r}
 library(dProf)
-library(uuid)
 dpProj <- dpMakeProject("Test", "A simple dprof test", "Jim P")
 str(dpProj)
 ```
+
+### Make the "tables" data frame.
+```{r}
+TblName <- "NewsCurrentEvents"
+TblSource <- system.file("extdata", "NewsCurrentEvents.csv",
+                         package = "dProf")
+dpTables <- dpMakeTable(dpProj$project_id[1], TblName, TblSource, 
+                       "Summarize email campaigns", "Jim P",
+                       notes = "Using the example csv in project")
+str(dpTables)
+```
+
+### Make the "column properties" data frame.
+```{r}
+dpProjID <- dpProj$project_id[1]
+dpTblID <- 1
+Tbl <- readr::read_csv(dpTables$table_source[dpTblID])
+dpColProp <- dpColumnPropertiesR(dpProjID, dpTblID, Tbl)
+str(dpColProp)
+```
+
+### Make the "column plots" data frame.
+```{r}
+dpColPlts <- dpColumnPlotsR(dpProjID, dpTblID, Tbl, dpColProp)
+str(dpColPlts)
+```
+
+### Run a data profiling report
 
 
 

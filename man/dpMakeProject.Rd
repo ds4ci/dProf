@@ -29,11 +29,13 @@ data.frame Initialized of one row with columns:
 }
 }
 \description{
-\code{dpMakeProject} creates a initial one-row data frame for
+\code{dpMakeProject} creates an initial one-row data frame for
 the data profiling project.
 }
 \examples{
 \dontrun{
-dpMakeProject("Test1", "A test project", "JimP")}
+dpTest <- dpMakeProject("Test1", "A test project", "JimP")
+summary(dpTest)
+}
 }
 

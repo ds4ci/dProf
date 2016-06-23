@@ -1,6 +1,6 @@
 #' Make a project data frame.
 #'
-#' \code{dpMakeProject} creates a initial one-row data frame for
+#' \code{dpMakeProject} creates an initial one-row data frame for
 #' the data profiling project.
 #'
 #' @param name character Short name of the project.
@@ -20,11 +20,13 @@
 #' }
 #' @examples
 #' \dontrun{
-#' dpMakeProject("Test1", "A test project", "JimP")}
+#' dpTest <- dpMakeProject("Test1", "A test project", "JimP")
+#' summary(dpTest)
+#' }
 dpMakeProject <- function(name, description, created_by, notes =  NA) {
   # if(is.null(created_by)) stop("created_by not in argument list")
   df <- data.frame(
-    project_id = UUIDgenerate(),
+    project_id = uuid::UUIDgenerate(),
     project_name = name,
     project_description = description,
     project_notes = notes,

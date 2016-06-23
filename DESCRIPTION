@@ -13,9 +13,11 @@ Imports:
     grid,
     gridExtra,
     tidyr,
+    magrittr,
     dplyr,
     knitr,
     stringr,
+    stringi,
     uuid,
     readr
 RoxygenNote: 5.0.1
