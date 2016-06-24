@@ -2,7 +2,7 @@
 title: "Simple dProf Report via RMarkdown"
 author: "Jim Porzak"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
-output: rmarkdown::html_vignette
+output: html_document
 vignette: >
   %\VignetteIndexEntry{Simple dProf Report via RMarkdown}
   %\VignetteEngine{knitr::rmarkdown}
