@@ -10,6 +10,7 @@ vignette: >
 params:
   dProfProjectID: "use 1st row"
   dProfRunPath: !r as.character("C:/proj/dProf/dpRun.RData")
+  dProfColor: "wheat3"
 ---
 
 ```{r rmd_setup, include=FALSE}
@@ -23,6 +24,7 @@ library(ggplot2)
 library(stringr)
 
 line_length <- 100    ## set length of Head, Tail, Top, & Bottom strings
+BarColor <- params$dProfColor
 
 load(params$dProfRunPath)
 # str(dpProj)
@@ -51,7 +53,7 @@ kable(tbl_sum,
 ```
 
 
-```{r col_summary, echo=FALSE, results="asis", fig.height= 2}
+```{r col_summary, echo=FALSE, results="asis", fig.height=2, fig.width=8}
 for(ith_tbl in tbl_sum$table_id) {
   col_sum <- dpColProp %>%
     filter(project_id == dpProj$project_id[ProjRow],
@@ -70,9 +72,11 @@ for(ith_tbl in tbl_sum$table_id) {
     kt1 <- col_sum_i %>%
       select(num_rows, num_nulls, num_distinct, num_empty,
              num_numeric, num_date)
+    kt1 <- rbind(kt1, round(100 * kt1 / kt1$num_rows, 1))
+    kt1 <- cbind(c("#", "%"), kt1)
     print(kable(kt1,
-                col.names = c("# Rows", "# NULLs", "# Distinct",
-                             "# Empty", "# Numeric", "# Date")))
+                col.names = c("", "Rows", "NAs", "Distinct",
+                             "Empty", "Numeric", "Date")))
     kt2 <- col_sum_i %>%
       select(minimum, first_quartile, second_quartile, mean, third_quartile,
              maximum)
@@ -87,14 +91,17 @@ for(ith_tbl in tbl_sum$table_id) {
 
     if (bars$plot_type[1] == "histogram") {
       bars$x_var <- as.numeric(bars$x_var)
-      p <- ggplot(bars, aes(x_var, count)) + geom_bar(stat = "identity") +
-             xlab("Value") + ylab("# Rows")
+      p <- ggplot(bars, aes(x_var, count)) + 
+        geom_bar(stat = "identity", fill = BarColor) +
+        xlab("Value") + ylab("# Rows")
     } else {
-      XLab <- ifelse(bars$plot_type[1] == "first character", "1st Character of String",
+      XLab <- ifelse(bars$plot_type[1] == "first character", 
+                     "1st Character of String",
                      ifelse(bars$plot_type[1] == "catigorical", "Category",
                             ""))
-      p <- ggplot(bars, aes(x_var, count)) + geom_bar(stat = "identity") +
-             xlab(XLab) + ylab("# Rows")
+      p <- ggplot(bars, aes(x_var, count)) + 
+        geom_bar(stat = "identity", fill = BarColor) +
+        xlab(XLab) + ylab("# Rows")
     }
 
     print(p)
