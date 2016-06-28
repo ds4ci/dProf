@@ -40,11 +40,10 @@
 #' }
 dpColumnPlotsR <- function(in_project_id, in_table_id, input_tbl, dp_col_prop,
                            max_levels = 12){
-##  if(!dplyr::is.tbl(input_tbl)) stop("input_tbl not a table")  ## make sure dplyr is available for below
   df <- NULL
   for(ColRow in seq_along(input_tbl)){
     col_sum_i <- subset(dp_col_prop, project_id == in_project_id &
-             table_id == in_table_id & column_id == ColRow)
+                        table_id == in_table_id & column_id == ColRow)
     ColName <- col_sum_i$column_name
     while(TRUE) {
       if(col_sum_i$num_distinct < max_levels) {     ## a few discrete levels > bar plot
@@ -73,8 +72,6 @@ dpColumnPlotsR <- function(in_project_id, in_table_id, input_tbl, dp_col_prop,
         bars <- as.data.frame(table(cut(input_tbl[[ColRow]],
                                         breaks = pretty(input_tbl[[ColRow]], 50))),
                               stringsAsFactors = FALSE)
-        bars$Var1 <- as.numeric(stringr::str_replace(
-          stringr::str_split_fixed(bars$Var1, stringr::fixed(","), n = 2)[, 2], stringr::fixed("]"), ""))
         break
       }
     }
