@@ -89,23 +89,29 @@ for(ith_tbl in tbl_sum$table_id) {
              plot_id == 1) %>%
       select(plot_type, x_var, count)
 
-    if (bars$plot_type[1] == "histogram") {
-      bars$x_var <- as.numeric(bars$x_var)
-      p <- ggplot(bars, aes(x_var, count)) + 
-        geom_bar(stat = "identity", fill = BarColor) +
-        xlab("Value") + ylab("# Rows")
+    if(sum(!is.na(bars$x_var)) == 0) {
+      cat("\n WARNING: Plot x_var all NAs. Plot omitted.\n")
     } else {
-      XLab <- ifelse(bars$plot_type[1] == "first character", 
-                     "1st Character of String",
-                     ifelse(bars$plot_type[1] == "catigorical", "Category",
-                            ""))
-      p <- ggplot(bars, aes(x_var, count)) + 
-        geom_bar(stat = "identity", fill = BarColor) +
-        xlab(XLab) + ylab("# Rows")
+      if (bars$plot_type[1] == "histogram") {
+        if(col_sum_i$column_type %in% c("Date", "POSIXct")) {
+          bars$x_var <- as.Date(bars$x_var) 
+        } else {
+          bars$x_var <- as.numeric(bars$x_var)
+        }
+        p <- ggplot(bars, aes(x_var, count)) + 
+          geom_bar(stat = "identity", fill = BarColor) +
+          xlab("Value") + ylab("# Rows")
+      } else {
+        XLab <- ifelse(bars$plot_type[1] == "first character", 
+                       "1st Character of String",
+                       ifelse(bars$plot_type[1] == "catigorical", "Category",
+                              ""))
+        p <- ggplot(bars, aes(x_var, count)) + 
+          geom_bar(stat = "identity", fill = BarColor) +
+          xlab(XLab) + ylab("# Rows")
+      }
+      print(p)
     }
-
-    print(p)
-
     cat("\n")
     cat("\n* __Head:__", str_sub(col_sum$head[ith_col], end = line_length),
         "\n* __Tail:__", str_sub(col_sum$tail[ith_col], end = line_length),
